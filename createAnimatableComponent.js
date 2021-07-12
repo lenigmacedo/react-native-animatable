@@ -108,15 +108,15 @@ function transitionToValue(
   const animation =
     duration || easing || delay
       ? Animated.timing(transitionValue, {
-          toValue,
-          delay,
-          duration: duration || 1000,
-          easing:
-            typeof easing === 'function'
-              ? easing
-              : EASING_FUNCTIONS[easing || 'ease'],
-          useNativeDriver,
-        })
+        toValue,
+        delay,
+        duration: duration || 1000,
+        easing:
+          typeof easing === 'function'
+            ? easing
+            : EASING_FUNCTIONS[easing || 'ease'],
+        useNativeDriver,
+      })
       : Animated.spring(transitionValue, { toValue, useNativeDriver });
   setTimeout(() => onTransitionBegin(property), delay);
   animation.start(() => onTransitionEnd(property));
@@ -181,10 +181,10 @@ export default function createAnimatableComponent(WrappedComponent) {
       easing: undefined,
       iterationCount: 1,
       iterationDelay: 0,
-      onAnimationBegin() {},
-      onAnimationEnd() {},
-      onTransitionBegin() {},
-      onTransitionEnd() {},
+      onAnimationBegin() { },
+      onAnimationEnd() { },
+      onTransitionBegin() { },
+      onTransitionEnd() { },
       style: undefined,
       transition: undefined,
       useNativeDriver: false,
@@ -308,19 +308,24 @@ export default function createAnimatableComponent(WrappedComponent) {
         delay,
         onAnimationBegin,
         iterationDelay,
+        noAnimateOnMount
       } = this.props;
       if (animation) {
-        const startAnimation = () => {
-          onAnimationBegin();
-          this.startAnimation(duration, 0, iterationDelay, endState =>
-            this.props.onAnimationEnd(endState),
-          );
-          this.delayTimer = null;
-        };
-        if (delay) {
-          this.delayTimer = setTimeout(startAnimation, delay);
+        if (noAnimateOnMount) {
+          this.startAnimation(0, 0);
         } else {
-          startAnimation();
+          const startAnimation = () => {
+            onAnimationBegin();
+            this.startAnimation(duration, 0, iterationDelay, endState =>
+              this.props.onAnimationEnd(endState),
+            );
+            this.delayTimer = null;
+          };
+          if (delay) {
+            this.delayTimer = setTimeout(startAnimation, delay);
+          } else {
+            startAnimation();
+          }
         }
       }
     }
